@@ -16,7 +16,7 @@ const ManyCountries = (props) =>  {
             </button>
             {showCountry
             ? <div>
-            <Country key={countryToShow.alpha3Code} country={countryToShow} />
+            <Country key={countryToShow.alpha2Code} country={countryToShow} />
             </div>
             : ''
             }
