@@ -6,6 +6,7 @@ const Weather = (props) => {
     const api_key = process.env.REACT_APP_API_KEY
     
     useEffect(() => {
+        setWeather([])
         axios
             .get(`http://api.weatherstack.com/current?access_key=${api_key}&query=${props.capital}`)
             .then(response => {
