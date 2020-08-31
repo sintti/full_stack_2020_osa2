@@ -4,7 +4,11 @@ import React from 'react'
 const Person = (props) => {
     return (
         <div>
-            <span>{props.person.name} {props.person.number}</span>
+            <span>
+                {props.person.name}
+                {props.person.number}
+                <button onClick={props.handlePersonDelete}>Delete</button>
+            </span>
         </div>
     )
 }

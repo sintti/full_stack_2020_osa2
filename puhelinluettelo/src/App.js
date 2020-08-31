@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import services from './services/services'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
@@ -14,13 +14,9 @@ const App = () => {
     
     // Get data from db.json with axios
     useEffect(() => {
-        console.log('effect')
-        axios
-            .get('http://localhost:3001/persons')
-            .then(response => {
-                console.log('promise fulfilled')
-                setPersons(response.data)
-            })
+        services
+            .getAll()
+            .then(initialData => {setPersons(initialData)})
     }, [])
     
     // Changelistener for name
@@ -39,6 +35,31 @@ const App = () => {
         setNewFilter(event.target.value)
     }
     
+    const handlePersonDelete = id => {
+        const url = `http://localhost:3001/persons/${id}`
+        const person = persons.find(p => p.id === id)
+        const result = window.confirm(`Delete ${person.name}`)
+        if (result === true) {
+                services
+                    .deletePerson(url)
+                    .then(() => {
+                        // onDelete(id)
+                        setPersons(persons.filter(p => p.id !== id))
+                    })
+        }
+    }
+    
+    // Kokeilin rakentaa funktion, jolla saisin muokattua tietokannan ID:t poiston jälkeen
+    // const onDelete = id => {
+    //     const afterDelete = persons.filter(p => p.id > id)
+    //     afterDelete.forEach(p => p.id -= 1)
+    //     afterDelete.forEach(p => services
+    //                                 .update(p.id, p)
+    //                                 .then(resData => {
+    //                                     setPersons(persons.concat(resData))
+    //                                 }))
+    // }
+    
     // Filter show information based on filter value
     const personsToShow = showAll
         ? persons
@@ -54,13 +75,24 @@ const App = () => {
         }
         
         // Check if phonebook already contains same person
+        // and add new person if not
         function containsObject(obj, list) {
             return list.some(elem => elem.name === obj.name)
         }
         if (containsObject(personObject, persons) === false) {
-            setPersons(persons.concat(personObject))
+            services
+                .create(personObject)
+                .then(returnedPerson => {
+                    setPersons(persons.concat(returnedPerson))
+                })
         } else if (containsObject(personObject, persons) === true) {
-            alert(personObject.name + ' is already in phonebook')
+            const changeNumber = window.confirm(`${personObject.name} is already added. Replace number?`)
+            if (changeNumber === true) {
+                const person = persons.find(p => p.name === personObject.name)
+                services
+                    .update(person.id, personObject)
+                    .then(resData => {setPersons(persons.concat(resData))})
+            }
         }
         
         setNewName('')
@@ -75,7 +107,7 @@ const App = () => {
                 handleNameChange={handleNameChange} handleNumberChange={handleNumberChange}
                 addPerson={addPerson} />
             <h2>Numbers</h2>
-            <Persons personsToShow={personsToShow} />
+            <Persons personsToShow={personsToShow} handlePersonDelete={handlePersonDelete} />
         </div>
     )
     
