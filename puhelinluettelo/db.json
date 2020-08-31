@@ -1,34 +1,9 @@
 {
   "persons": [
     {
-      "name": "Erkkaxxxx",
-      "number": "1234",
-      "id": 2
-    },
-    {
       "name": "erkkaaaaa",
       "number": "111",
-      "id": 3
-    },
-    {
-      "name": "Erkkasssss",
-      "number": "1234",
-      "id": 4
-    },
-    {
-      "name": "erkkaeeeee",
-      "number": "111",
-      "id": 5
-    },
-    {
-      "name": "Pertti",
-      "number": "12334",
-      "id": 6
-    },
-    {
-      "name": "Pertti",
-      "number": "12334",
-      "id": 7
+      "id": 1
     }
   ]
 }

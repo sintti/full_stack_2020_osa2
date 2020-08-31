@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import './index.css'
 import services from './services/services'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
 
 
 const App = () => {
@@ -11,12 +13,29 @@ const App = () => {
     const [ newNumber, setNewNumber ] = useState('')
     const [ newFilter, setNewFilter ] = useState('')
     const [ showAll, setShowAll ] = useState()
+    const [ errorMessage, setErrorMessage ] = useState('Here comes error!')
     
     // Get data from db.json with axios
     useEffect(() => {
         services
             .getAll()
-            .then(initialData => {setPersons(initialData)})
+            .then(initialData => {
+                setPersons(initialData)
+                setErrorMessage(
+                    `Loaded information from server successfully.`
+                )
+                setTimeout(() => {
+                    setErrorMessage(null)
+                }, 5000)
+            })
+            .catch(() => {
+                setErrorMessage(
+                    `Could not load data from server.`
+                )
+                setTimeout(() => {
+                    setErrorMessage(null)
+                }, 5000)
+            })
     }, [])
     
     // Changelistener for name
@@ -36,31 +55,31 @@ const App = () => {
     }
     
     const handlePersonDelete = id => {
-        const url = `http://localhost:3001/persons/${id}`
         const person = persons.find(p => p.id === id)
         const result = window.confirm(`Delete ${person.name}`)
         if (result === true) {
                 services
-                    .deletePerson(url)
+                    .deletePerson(id)
                     .then(() => {
-                        // onDelete(id)
                         setPersons(persons.filter(p => p.id !== id))
+                        setErrorMessage(
+                            `Deleted information successfully.`
+                        )
+                        setTimeout(() => {
+                            setErrorMessage(null)
+                        }, 5000)
+                    })
+                    .catch(() => {
+                        setErrorMessage(
+                            `Person '${person}' was already removed from server`
+                        )
+                        setTimeout(() => {
+                            setErrorMessage(null)
+                        }, 5000)
                     })
         }
     }
     
-    // Kokeilin rakentaa funktion, jolla saisin muokattua tietokannan ID:t poiston jälkeen
-    // const onDelete = id => {
-    //     const afterDelete = persons.filter(p => p.id > id)
-    //     afterDelete.forEach(p => p.id -= 1)
-    //     afterDelete.forEach(p => services
-    //                                 .update(p.id, p)
-    //                                 .then(resData => {
-    //                                     setPersons(persons.concat(resData))
-    //                                 }))
-    // }
-    
-    // Filter show information based on filter value
     const personsToShow = showAll
         ? persons
         : persons.filter(person => person.name.toLowerCase().includes(newFilter))
@@ -85,13 +104,37 @@ const App = () => {
                 .then(returnedPerson => {
                     setPersons(persons.concat(returnedPerson))
                 })
+                .catch(() => {
+                    setErrorMessage(
+                        `Could not update server.`
+                    )
+                    setTimeout(() => {
+                        setErrorMessage(null)
+                    }, 5000)
+                })
         } else if (containsObject(personObject, persons) === true) {
             const changeNumber = window.confirm(`${personObject.name} is already added. Replace number?`)
             if (changeNumber === true) {
-                const person = persons.find(p => p.name === personObject.name)
+                const change = persons.find(p => p.name === personObject.name)
                 services
-                    .update(person.id, personObject)
-                    .then(resData => {setPersons(persons.concat(resData))})
+                    .update(change.id, personObject)
+                    .then(resData => {
+                        setPersons(persons.map(person => person.id !== change.id ? person : resData ))
+                        setErrorMessage(
+                            `Updated information successfully.`
+                        )
+                        setTimeout(() => {
+                            setErrorMessage(null)
+                        }, 5000)
+                    })
+                    .catch(() => {
+                        setErrorMessage(
+                            `Update was not successfull.`
+                        )
+                        setTimeout(() => {
+                            setErrorMessage(null)
+                        }, 5000)
+                    })
             }
         }
         
@@ -102,6 +145,7 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={errorMessage} />
             <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
             <PersonForm newName={newName} newNumber={newNumber} 
                 handleNameChange={handleNameChange} handleNumberChange={handleNumberChange}
