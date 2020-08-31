@@ -3,19 +3,12 @@ import axios from 'axios'
 
 const Weather = (props) => {
     const [ weather, setWeather ] = useState([])
-    //const [ query, setQuery ] = useState('http://api.weatherstack.com/current?access_key=811a6244c4fd4fba2cf2888b46f366fb&query=')
+    const api_key = process.env.REACT_APP_API_KEY
     
     useEffect(() => {
-        let query = 'http://api.weatherstack.com/current?access_key=811a6244c4fd4fba2cf2888b46f366fb&query=' + props.capital
-        console.log('weather effect')
-        console.log(query)
-        
         axios
-            .get(query)
+            .get(`http://api.weatherstack.com/current?access_key=${api_key}&query=${props.capital}`)
             .then(response => {
-                console.log('weather promise fulfilled')
-                console.log(response.data.current)
-                
                 setWeather(response.data.current)
             })
     }, [])
